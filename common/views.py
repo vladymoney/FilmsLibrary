@@ -3,6 +3,7 @@ from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
+from FilmsLibrary.common.forms import UserRegistrationForm
 
 # Create your views here.
 
@@ -61,7 +62,14 @@ def profile(request):
 
 
 def register(request):
-    return render(request, 'register.html')
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # Replace 'success' with the URL name of your success page
+    else:
+        form = UserRegistrationForm()
+    return render(request, 'register.html', {'form': form})
 
 def film(request):
     return render(request, 'film.html')
