@@ -1,6 +1,7 @@
 from django.urls import path
 
-from FilmsLibrary.common.views import index, watch_later, profile, film, search, register, sign_out, sign_in
+from FilmsLibrary.common.views import index, watch_later, profile, film, search, register, sign_out, sign_in, \
+        edit_comment, delete_comment
 
 urlpatterns = [
         path('', index, name='index'),
@@ -11,5 +12,7 @@ urlpatterns = [
         path('register/', register, name='register'),
         path('login/', sign_in, name='login'),
         path('logout/', sign_out, name='logout'),
+        path('comment/edit/<int:comment_id>/', edit_comment, name='edit_comment'),
+        path('comment/delete/<int:comment_id>/', delete_comment, name='delete_comment'),
 
 ]

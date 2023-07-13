@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from FilmsLibrary.common.forms import UserRegistrationForm, LoginForm, CommentForm
@@ -136,7 +136,25 @@ def film(request, pk):
     return render(request, 'film.html', {'film': film_details, 'form': form, 'comments': comments})
 
 
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
 
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('film_detail', pk=comment.film_id)
+    else:
+        form = CommentForm(instance=comment)
+
+    return render(request, 'film.html', {'form': form})
+
+
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    film_id = comment.film_id
+    comment.delete()
+    return redirect('film_detail', pk=film_id)
 
 def sign_out(request):
     logout(request)
