@@ -30,3 +30,15 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.email
+
+
+
+
+class Comment(models.Model):
+    film_id = models.CharField(max_length=20)
+    user_name = models.CharField(max_length=100, default='')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user_name

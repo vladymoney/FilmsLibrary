@@ -1,11 +1,13 @@
 import requests
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from FilmsLibrary.common.forms import UserRegistrationForm,  LoginForm
+from FilmsLibrary.common.forms import UserRegistrationForm, LoginForm, CommentForm
+from FilmsLibrary.common.models import Comment
 
 # Create your views here.
 
@@ -100,6 +102,7 @@ def sign_in(request):
         messages.error(request, f'Invalid username or password')
         return render(request, 'login.html', {'form': form})
 
+@login_required  # Require authentication to submit comments
 def film(request, pk):
     url = f"https://api.themoviedb.org/3/movie/{pk}?api_key={API_KEY}"
     response = requests.get(url)
@@ -114,7 +117,23 @@ def film(request, pk):
         # Add more fields as needed
     }
 
-    return render(request, 'film.html', {'film': film_details})
+    # Handle comment submission
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.film_id = pk
+            comment.user_name = request.user.username if request.user.is_authenticated else 'Anonymous'
+            comment.save()
+            return redirect('film_detail', pk=pk)
+
+    else:
+        form = CommentForm()
+
+    # Retrieve comments for the film
+    comments = Comment.objects.filter(film_id=pk)
+
+    return render(request, 'film.html', {'film': film_details, 'form': form, 'comments': comments})
 
 
 
